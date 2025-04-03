@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -60,7 +61,7 @@ REST_FRAMEWORK = {
 }
 from datetime import timedelta 
 SIMPLE_JWT = { 
-	'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
+	'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
 'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 'ROTATE_REFRESH_TOKENS': False,
 	'BLACKLIST_AFTER_ROTATION': True, 
@@ -137,12 +138,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+LANGUAGE_CODE = 'pt-br'
+TIME_ZONE = 'America/Sao_Paulo'  # Ajuste conforme necessário
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -155,3 +153,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Para envio real
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para testes no console(comentar em produção)
+EMAIL_HOST = 'smtp.gmail.com'  # Exemplo com Gmail; ajuste para seu provedor
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'suporteLayza@gmail.com'  # Seu email
+EMAIL_HOST_PASSWORD = '123'  # Senha de app (não a senha normal, se usar Gmail)
+DEFAULT_FROM_EMAIL = 'Layza Suporte <suporteLayza@gmail.com>'
