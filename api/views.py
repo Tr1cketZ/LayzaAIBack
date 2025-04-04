@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from drf_yasg.utils import swagger_auto_schema
 from .serializers import *
 from rest_framework.decorators import api_view, permission_classes
@@ -9,6 +8,8 @@ from .models import PasswordResetToken
 from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
+from drf_yasg import openapi
+
 # Create your views here.
 @swagger_auto_schema(
     methods=['POST'],
@@ -23,7 +24,6 @@ def register(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @swagger_auto_schema(
     methods=['POST'],
@@ -43,7 +43,7 @@ def password_reset_request(request):
         
         # Gerar link de recuperação
         reset_url = request.build_absolute_uri(
-            reverse('password_reset_request') + f'?token={token.token}'
+            reverse('password_reset_confirm') + f'?token={token.token}'
         )
         
         # Enviar email
@@ -74,27 +74,45 @@ def password_reset_request(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(
-    method='post',
+    methods=['POST'],
     request_body=PasswordResetConfirmSerializer,
     tags=["token"],
-    responses={
-        200: 'Senha redefinida com sucesso.',
-        400: 'Erro na validação do token ou senha.'
-    }
+    manual_parameters=[
+        openapi.Parameter(
+            'token',
+            openapi.IN_QUERY,
+            description="Token de recuperação de senha",
+            type=openapi.TYPE_STRING,
+            required=True
+        )
+    ]
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def password_reset_confirm(request):
+    token = request.GET.get('token')
+    if not token:
+        return Response(
+            {"token": "O token é obrigatório na URL."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        reset_token = PasswordResetToken.objects.get(token=token)
+        if not reset_token.is_valid():
+            return Response(
+                {"token": "Este link expirou. Solicite um novo."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    except PasswordResetToken.DoesNotExist:
+        return Response(
+            {"token": "Token inválido."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     serializer = PasswordResetConfirmSerializer(data=request.data)
     if serializer.is_valid():
-        reset_token = serializer.validated_data['reset_token']
         user = reset_token.user
-        
-        # Alterar a senha
         user.set_password(serializer.validated_data['password'])
         user.save()
-        
-        # Invalidar o token após uso
         reset_token.delete()
         
         return Response(

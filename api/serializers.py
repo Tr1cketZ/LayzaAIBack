@@ -132,13 +132,6 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         return value
     
 class PasswordResetConfirmSerializer(serializers.Serializer):
-    token = serializers.UUIDField(
-        required=True,
-        error_messages={
-            'required': 'O token é obrigatório.',
-            'invalid': 'Token inválido.'
-        }
-    )
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -148,26 +141,13 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         }
     )
 
-    def validate(self, attrs):
-        token = attrs.get('token')
-        password = attrs.get('password')
-
-        # Validar o token
-        try:
-            reset_token = PasswordResetToken.objects.get(token=token)
-            if not reset_token.is_valid():
-                raise serializers.ValidationError({"token": "Este link expirou. Solicite um novo."})
-        except PasswordResetToken.DoesNotExist:
-            raise serializers.ValidationError({"token": "Token inválido."})
-
+    def validate_password(self, value):
         # Validar a senha conforme RF03
-        if not (re.search(r'[A-Z]', password) and 
-                re.search(r'[a-z]', password) and 
-                re.search(r'[0-9]', password)):
-            raise serializers.ValidationError({
-                "password": "A senha deve ter pelo menos 8 caracteres, com uma letra maiúscula, uma minúscula e um número."
-            })
-
-        attrs['reset_token'] = reset_token
-        return attrs
+        if not (re.search(r'[A-Z]', value) and 
+                re.search(r'[a-z]', value) and 
+                re.search(r'[0-9]', value)):
+            raise serializers.ValidationError(
+                "A senha deve ter pelo menos 8 caracteres, com uma letra maiúscula, uma minúscula e um número."
+            )
+        return value
     
