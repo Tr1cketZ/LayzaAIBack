@@ -1,7 +1,7 @@
 from drf_yasg.utils import swagger_auto_schema
 from .serializers import *
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from .models import PasswordResetToken
@@ -10,11 +10,20 @@ from django.conf import settings
 from django.urls import reverse
 from drf_yasg import openapi
 
+
+@swagger_auto_schema(
+    methods=['GET'],
+    tags=["Auth"],
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me(request):
+    return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
 # Create your views here.
 @swagger_auto_schema(
     methods=['POST'],
     request_body= UserCreateSerializer,
-    tags=["token"],
+    tags=["Auth"],
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -27,8 +36,21 @@ def register(request):
 
 @swagger_auto_schema(
     methods=['POST'],
+    request_body= LoginSerializer,
+    tags=["Auth"],
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login(request):
+    serializer = LoginSerializer(data=request.data)
+    if serializer.is_valid():
+        return Response(serializer.validate(request.data), status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(
+    methods=['POST'],
     request_body= PasswordResetRequestSerializer,
-    tags=["token"],
+    tags=["Auth"],
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -76,7 +98,7 @@ def password_reset_request(request):
 @swagger_auto_schema(
     methods=['POST'],
     request_body=PasswordResetConfirmSerializer,
-    tags=["token"],
+    tags=["Auth"],
     manual_parameters=[
         openapi.Parameter(
             'token',

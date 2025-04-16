@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Conteudo, Progresso, Avaliacao, PerfilUsuario, PasswordResetToken	
+from .models import Conteudo, Progresso, Avaliacao, PerfilUsuario
+from rest_framework_simplejwt.tokens import RefreshToken
 import re
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,9 +10,30 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff']
         read_only_fields = ['is_staff']  # Apenas admin pode alterar
 
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+        if not email or not password:
+            raise serializers.ValidationError("Email e senha obrigatórios.")
+        user = User.objects.filter(email=email).first()
+        if not user:
+            raise serializers.ValidationError("Email ou senha incorretos.")
+        if not user.is_active:
+            raise serializers.ValidationError("Conta desativada.")
+        authenticated_user = authenticate(username=user.username,password=password)
+        if not authenticated_user:
+            raise serializers.ValidationError("Email ou senha incorretos.")
+        refresh = RefreshToken.for_user(authenticated_user)
+        return {
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }
+
 class UserCreateSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
     email = serializers.EmailField(
         required=True,
         error_messages={
@@ -32,7 +53,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = User
-        fields = ['email', 'password', 'first_name', 'last_name']
+        fields = ['username','email', 'password']
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Este email já está cadastrado.")
+        if '@' not in value or '.' not in value.split('@')[-1]:
+            raise serializers.ValidationError("Insira um email válido, como exemplo@dominio.com")
+        return value
     def validate_password(self, value):
             if not re.search(r'[A-Z]', value):
                 raise serializers.ValidationError("A senha deve conter pelo menos uma letra maiúscula.")
@@ -42,20 +69,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("A senha deve conter pelo menos um número.")
             return value
     def create(self, validated_data):
-        if not validated_data['email']:
-            raise serializers.ValidationError('O campo email é obrigatório.')
-        username = validated_data['first_name']+"."+validated_data['last_name']
-        base_username = username.lower()
-        counter = 1
-        if User.objects.filter(username=username.lower()).exists():
-            username = f"{base_username}{counter}"
-            counter += 1
         user = User.objects.create_user(
-            username=username.lower(),
+            username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -136,18 +153,36 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         write_only=True,
         min_length=8,
         error_messages={
+            'blank': 'A senha não pode estar em branco.',
             'required': 'A senha é obrigatória.',
             'min_length': 'A senha deve ter pelo menos 8 caracteres.'
         }
     )
-
+    code = serializers.CharField(
+        write_only=True,
+        min_length=6,
+        max_length=6,
+        error_messages={
+            'blank': 'O código não pode estar em branco.',
+            'required': 'O código é obrigatório.',
+            'min_length': 'O código deve ter pelo menos 6 caracteres.',
+            'max_length': 'O código deve ter no máximo 6 caracteres.'
+        }
+    )
+    email = serializers.EmailField(
+        required=True,
+        error_messages={
+            'blank': 'O email não pode estar em branco.',
+            'required': 'O email é obrigatório.',
+            'invalid': 'Insira um email válido, como exemplo@dominio.com'
+        }
+    )
     def validate_password(self, value):
-        # Validar a senha conforme RF03
-        if not (re.search(r'[A-Z]', value) and 
-                re.search(r'[a-z]', value) and 
-                re.search(r'[0-9]', value)):
-            raise serializers.ValidationError(
-                "A senha deve ter pelo menos 8 caracteres, com uma letra maiúscula, uma minúscula e um número."
-            )
+        if not re.search(r'[A-Z]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos uma letra maiúscula.")
+        if not re.search(r'[a-z]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos uma letra minúscula.")
+        if not re.search(r'[0-9]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos um número.")
         return value
-    
+

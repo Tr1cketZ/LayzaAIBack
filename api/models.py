@@ -26,7 +26,17 @@ class Conteudo(models.Model):
 
     def __str__(self):
         return self.titulo
-
+    
+class Prova(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    titulo = models.CharField(max_length=100)
+    data = models.DateField()
+    foto = models.ImageField(upload_to='provas/', null=True, blank=True)
+    descricao = models.TextField(blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario.username}"
+    
 class Avaliacao(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     conteudo = models.ForeignKey(Conteudo, on_delete=models.CASCADE)
@@ -54,7 +64,7 @@ import uuid
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    code = models.CharField(max_length=6, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
