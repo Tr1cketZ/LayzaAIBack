@@ -1,3 +1,5 @@
+import random
+import string
 from drf_yasg.utils import swagger_auto_schema
 from .serializers import *
 from rest_framework.decorators import api_view, permission_classes
@@ -58,42 +60,44 @@ def password_reset_request(request):
     serializer = PasswordResetRequestSerializer(data=request.data)
     if serializer.is_valid():
         email = serializer.validated_data['email']
-        user = User.objects.get(email=email)
+        try:
+            user = User.objects.get(email=email)
+            # Gerar código de 6 dígitos
+            code = ''.join(random.choices(string.digits, k=6))
+            # Criar token com código
+            PasswordResetToken.objects.create(user=user, code=code)
+            
+            # Enviar email com código
+            subject = "Recuperação de Senha - Layza"
+            message = f"""
+            Olá {user.first_name or user.username},
 
-        # Criar token temporário
-        token = PasswordResetToken.objects.create(user=user)
-        
-        # Gerar link de recuperação
-        reset_url = request.build_absolute_uri(
-            reverse('password_reset_confirm') + f'?token={token.token}'
-        )
-        
-        # Enviar email
-        subject = "Recuperação de Senha - Layza"
-        message = f"""
-        Olá {user.first_name},
+            Você solicitou a recuperação de senha. Use o código abaixo para redefinir sua senha:
+            Código: {code}
 
-        Você solicitou a recuperação de senha. Clique no link abaixo para redefinir sua senha:
-        {reset_url}
+            Este código é válido por 15 minutos. Se você não solicitou isso, ignore este email.
 
-        Este link é válido por 15 minutos. Se você não solicitou isso, ignore este email.
+            Equipe Layza
+            """
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
 
-        Equipe Layza
-        """
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            fail_silently=False,
-        )
-
-        return Response(
-            {"message": "Email de recuperação enviado com sucesso."},
-            status=status.HTTP_200_OK
-        )
-    
+            return Response(
+                {"message": "Código de recuperação enviado com sucesso."},
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "Email não encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+            )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 
 @swagger_auto_schema(
     methods=['POST'],

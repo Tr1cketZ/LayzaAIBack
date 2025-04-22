@@ -64,7 +64,7 @@ import uuid
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    code = models.CharField(max_length=6, unique=True)
+    code = models.CharField(max_length=6, unique=True, default=00000)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 

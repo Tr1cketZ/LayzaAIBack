@@ -149,7 +149,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         return value
     
 class PasswordResetConfirmSerializer(serializers.Serializer):
-    password = serializers.CharField(
+    new_password = serializers.CharField(
         write_only=True,
         min_length=8,
         error_messages={
@@ -177,7 +177,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             'invalid': 'Insira um email válido, como exemplo@dominio.com'
         }
     )
-    def validate_password(self, value):
+    def validate_new_password(self, value):
         if not re.search(r'[A-Z]', value):
             raise serializers.ValidationError("A senha deve conter pelo menos uma letra maiúscula.")
         if not re.search(r'[a-z]', value):
