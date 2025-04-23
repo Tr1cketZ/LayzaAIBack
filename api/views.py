@@ -103,47 +103,44 @@ def password_reset_request(request):
     methods=['POST'],
     request_body=PasswordResetConfirmSerializer,
     tags=["Auth"],
-    manual_parameters=[
-        openapi.Parameter(
-            'token',
-            openapi.IN_QUERY,
-            description="Token de recuperação de senha",
-            type=openapi.TYPE_STRING,
-            required=True
-        )
-    ]
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def password_reset_confirm(request):
-    token = request.GET.get('token')
-    if not token:
-        return Response(
-            {"token": "O token é obrigatório na URL."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    try:
-        reset_token = PasswordResetToken.objects.get(token=token)
-        if not reset_token.is_valid():
-            return Response(
-                {"token": "Este link expirou. Solicite um novo."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-    except PasswordResetToken.DoesNotExist:
-        return Response(
-            {"token": "Token inválido."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
     serializer = PasswordResetConfirmSerializer(data=request.data)
     if serializer.is_valid():
-        user = reset_token.user
-        user.set_password(serializer.validated_data['password'])
-        user.save()
-        reset_token.delete()
+        email = serializer.validated_data['email']
+        code = serializer.validated_data['code']
         
-        return Response(
-            {"message": "Senha redefinida com sucesso."},
-            status=status.HTTP_200_OK
-        )
+        try:
+            user = User.objects.get(email=email)
+            reset_token = PasswordResetToken.objects.filter(user=user, code=code).first()
+            
+            if not reset_token:
+                return Response(
+                    {"code": "Código de verificação inválido."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            if not reset_token.is_valid():
+                return Response(
+                    {"code": "Este código expirou. Solicite um novo."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            reset_token.delete()
+            
+            return Response(
+                {"message": "Senha redefinida com sucesso."},
+                status=status.HTTP_200_OK
+            )
+            
+        except User.DoesNotExist:
+            return Response(
+                {"email": "Email não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
