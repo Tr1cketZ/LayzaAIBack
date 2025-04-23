@@ -9,4 +9,10 @@ urlpatterns = [
     path('password-reset/confirm/', views.password_reset_confirm, name='password_reset_confirm'),
 
     path('me/', views.me),
+    # Faltam endpoints para:
+    # - Listar/atualizar/deletar usuários (admin)
+    # - CRUD completo de conteúdos
+    # - CRUD completo de avaliações
+    # - CRUD completo de progresso
+    # - CRUD completo de provas
 ]
