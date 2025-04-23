@@ -93,35 +93,37 @@ A documentação da API está disponível em `/swagger/` quando o servidor estiv
 ### Endpoints Principais
 
 #### Autenticação ✅ Implementado
-- `POST /api/auth/register/` - Cadastro de usuário
-- `POST /api/auth/login/` - Login
-- `POST /api/auth/password-reset/` - Recuperação de senha
+- `POST /api/register/` - Cadastro de usuário
+- `POST /api/login/` - Login
+- `POST /api/password-reset/` - Solicitação de redefinição de senha
+- `POST /api/password-reset/confirm/` - Confirmação de redefinição de senha
+- `GET /api/me/` - Informações do usuário autenticado
 
-#### Perfil ⚠️ Parcialmente Implementado
+#### Perfil ✅ Implementado
 - `GET /api/profile/` - Visualizar perfil
-- `PUT /api/profile/` - Atualizar preferências
+- `PUT /api/profile/update/` - Atualizar preferências
 
-#### Conteúdos ❌ Não Implementado
-- `GET /api/contents/` - Listar conteúdos
-- `POST /api/contents/` - Criar conteúdo (admin)
-- `GET /api/contents/<id>/` - Detalhes do conteúdo
-- `PUT /api/contents/<id>/` - Atualizar conteúdo (admin)
-- `DELETE /api/contents/<id>/` - Deletar conteúdo (admin)
+#### Conteúdos ✅ Implementado
+- `GET /api/conteudos/` - Listar conteúdos
+- `POST /api/conteudos/create/` - Criar conteúdo (admin)
+- `GET /api/conteudos/<id>/` - Detalhes do conteúdo
+- `PUT /api/conteudos/<id>/update/` - Atualizar conteúdo (admin)
+- `DELETE /api/conteudos/<id>/delete/` - Deletar conteúdo (admin)
 
 #### Avaliações ❌ Não Implementado
-- `GET /api/ratings/` - Listar avaliações
-- `POST /api/ratings/` - Criar avaliação
-- `GET /api/ratings/<id>/` - Detalhes da avaliação
-- `PUT /api/ratings/<id>/` - Atualizar avaliação
-- `DELETE /api/ratings/<id>/` - Deletar avaliação
+- `GET /api/avaliacoes/` - Listar avaliações
+- `POST /api/avaliacoes/` - Criar avaliação
+- `GET /api/avaliacoes/<id>/` - Detalhes da avaliação
+- `PUT /api/avaliacoes/<id>/` - Atualizar avaliação
+- `DELETE /api/avaliacoes/<id>/` - Deletar avaliação
 
 #### Progresso ❌ Não Implementado
-- `GET /api/progress/` - Listar progresso
-- `POST /api/progress/` - Registrar progresso
-- `GET /api/progress/<id>/` - Detalhes do progresso
-- `PUT /api/progress/<id>/` - Atualizar progresso
+- `GET /api/progresso/` - Listar progresso
+- `POST /api/progresso/` - Registrar progresso
+- `GET /api/progresso/<id>/` - Detalhes do progresso
+- `PUT /api/progresso/<id>/` - Atualizar progresso
 
-#### Prova ❌ Não Implementado
+#### Provas ❌ Não Implementado
 - `GET /api/provas/` - Listar provas
 - `POST /api/provas/` - Criar prova
 - `GET /api/provas/<id>/` - Detalhes da prova
@@ -129,9 +131,9 @@ A documentação da API está disponível em `/swagger/` quando o servidor estiv
 - `DELETE /api/provas/<id>/` - Deletar prova
 
 #### Integração com IA ❌ Não Implementado
-- `POST /api/ia/recomendacoes/` - Receber recomendações
-- `POST /api/ia/analise/` - Enviar dados para análise
-- `GET /api/ia/perfil/` - Obter análise do perfil
+- `GET /api/recomendacoes/` - Obter recomendações
+- `POST /api/analise/` - Enviar dados para análise
+- `GET /api/analise/perfil/` - Obter análise do perfil
 
 ## 🔒 Segurança
 
@@ -160,13 +162,13 @@ layza-ai-back/
 
 ## 🧪 Testes
 
-❌ Ainda não implementado. O plano de testes inclui:
+⚠️ **Atenção**: Os testes ainda não foram implementados. O plano inclui:
 
-- Testes unitários para modelos
-- Testes de API para endpoints
-- Testes de integração
 - Testes de autenticação
-- Testes de permissões
+- Testes de CRUD
+- Testes de validação
+- Testes de integração
+- Testes de performance
 
 ## 🤝 Contribuição
 
