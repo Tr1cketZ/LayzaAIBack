@@ -41,11 +41,13 @@ INSTALLED_APPS = [
     'api',
     'drf_yasg',
     'rest_framework_simplejwt',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -161,3 +163,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'suporteLayza@gmail.com'  # Seu email
 EMAIL_HOST_PASSWORD = '123'  # Senha de app (não a senha normal, se usar Gmail)
 DEFAULT_FROM_EMAIL = 'Layza Suporte <suporteLayza@gmail.com>'
+
+# Configurações do CORS
+CORS_ALLOW_ALL_ORIGINS = True  # Em produção, defina como False e especifique os domínios permitidos
+CORS_ALLOW_CREDENTIALS = True
