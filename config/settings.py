@@ -166,4 +166,5 @@ DEFAULT_FROM_EMAIL = 'Layza Suporte <suporteLayza@gmail.com>'
 
 # Configurações do CORS
 CORS_ALLOW_ALL_ORIGINS = True  # Em produção, defina como False e especifique os domínios permitidos
+# CORS_ALLOWED_ORIGINS = [] # habilitar para produção quando CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
