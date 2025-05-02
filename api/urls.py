@@ -8,9 +8,9 @@ urlpatterns = [
     path('password-reset/', views.password_reset_request,name="password_reset_request"),
     path('password-reset/confirm/', views.password_reset_confirm, name='password_reset_confirm'),
 
-    path('me/', views.me),
-    path('profile/', views.perfil_detail, name='perfil-detail'),
-    path('profile/update/', views.perfil_update, name='perfil-update'),
+    path('perfil/', views.me, name='perfil-completo'),
+    path('perfil/update/', views.perfil_update_completo, name='perfil-update'),
+    path('perfil/delete/', views.perfil_delete, name='perfil-delete'),
 
     # Endpoints de Conteúdos
     path('conteudos/', views.conteudo_list, name='conteudo-list'),
@@ -18,6 +18,14 @@ urlpatterns = [
     path('conteudos/<int:pk>/', views.conteudo_detail, name='conteudo-detail'),
     path('conteudos/<int:pk>/update/', views.conteudo_update, name='conteudo-update'),
     path('conteudos/<int:pk>/delete/', views.conteudo_delete, name='conteudo-delete'),
+
+    # Endpoints de Provas
+    path('provas/', views.prova_list, name='prova-list'),
+    path('provas/create/', views.prova_create, name='prova-create'),
+    path('provas/<int:pk>/', views.prova_detail, name='prova-detail'),
+    path('provas/<int:pk>/update/', views.prova_update, name='prova-update'),
+    path('provas/<int:pk>/delete/', views.prova_delete, name='prova-delete'),
+
     # Faltam endpoints para:
     # - Listar/atualizar/deletar usuários (admin)
     # - CRUD completo de avaliações

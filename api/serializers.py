@@ -1,13 +1,17 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Conteudo, Progresso, Avaliacao, PerfilUsuario
+from .models import Conteudo, Progresso, Avaliacao, PerfilUsuario, Prova
 from rest_framework_simplejwt.tokens import RefreshToken
 import re
 from django.contrib.auth import authenticate
 class UserSerializer(serializers.ModelSerializer):
+    pref_visual = serializers.BooleanField(source='perfilusuario.pref_visual', read_only=True)
+    pref_auditivo = serializers.BooleanField(source='perfilusuario.pref_auditivo', read_only=True)
+    pref_leitura_escrita = serializers.BooleanField(source='perfilusuario.pref_leitura_escrita', read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff']
+        fields = ['id', 'username', 'email', 'is_staff', 'pref_visual', 'pref_auditivo', 'pref_leitura_escrita']
         read_only_fields = ['is_staff']  # Apenas admin pode alterar
 
 class LoginSerializer(serializers.Serializer):
@@ -51,24 +55,30 @@ class UserCreateSerializer(serializers.ModelSerializer):
             'min_length': 'A senha deve ter pelo menos 8 caracteres.'
         }
     )
+
     class Meta:
         model = User
-        fields = ['username','email', 'password']
+        fields = ['username', 'email', 'password']
+
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Este email já está cadastrado.")
         if '@' not in value or '.' not in value.split('@')[-1]:
             raise serializers.ValidationError("Insira um email válido, como exemplo@dominio.com")
         return value
+
     def validate_password(self, value):
-            if not re.search(r'[A-Z]', value):
-                raise serializers.ValidationError("A senha deve conter pelo menos uma letra maiúscula.")
-            if not re.search(r'[a-z]', value):
-                raise serializers.ValidationError("A senha deve conter pelo menos uma letra minúscula.")
-            if not re.search(r'[0-9]', value):
-                raise serializers.ValidationError("A senha deve conter pelo menos um número.")
-            return value
+        if not re.search(r'[A-Z]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos uma letra maiúscula.")
+        if not re.search(r'[a-z]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos uma letra minúscula.")
+        if not re.search(r'[0-9]', value):
+            raise serializers.ValidationError("A senha deve conter pelo menos um número.")
+        return value
+
     def create(self, validated_data):
+
+        # Cria o usuário
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data['email'],
@@ -76,6 +86,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password'])
         user.save()
+
+        # Cria o perfil do usuário
+        PerfilUsuario.objects.create(user=user)
+
         return user
 
 class PerfilUsuarioSerializer(serializers.ModelSerializer):
@@ -185,4 +199,71 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         if not re.search(r'[0-9]', value):
             raise serializers.ValidationError("A senha deve conter pelo menos um número.")
         return value
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        required=False,
+        error_messages={
+            'invalid': 'Insira um email válido, como exemplo@dominio.com',
+            'blank': 'O email não pode estar em branco.'
+        }
+    )
+    pref_visual = serializers.BooleanField(required=False)
+    pref_auditivo = serializers.BooleanField(required=False)
+    pref_leitura_escrita = serializers.BooleanField(required=False)
+
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'pref_visual', 'pref_auditivo', 'pref_leitura_escrita']
+        extra_kwargs = {
+            'email': {'required': False},
+            'username': {'required': False}
+        }
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError("Este email já está cadastrado.")
+        if '@' not in value or '.' not in value.split('@')[-1]:
+            raise serializers.ValidationError("Insira um email válido, como exemplo@dominio.com")
+        return value
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError("Este nome de usuário já está em uso.")
+        return value
+
+    def update(self, instance, validated_data):
+        # Remove os campos do perfil dos dados do usuário
+        perfil_data = {
+            'pref_visual': validated_data.pop('pref_visual', None),
+            'pref_auditivo': validated_data.pop('pref_auditivo', None),
+            'pref_leitura_escrita': validated_data.pop('pref_leitura_escrita', None)
+        }
+
+        # Atualiza o usuário
+        user = super().update(instance, validated_data)
+
+        # Atualiza o perfil se houver dados
+        if any(perfil_data.values()):
+            try:
+                perfil = PerfilUsuario.objects.get(user=user)
+                for key, value in perfil_data.items():
+                    if value is not None:
+                        setattr(perfil, key, value)
+                perfil.save()
+            except PerfilUsuario.DoesNotExist:
+                # Se o perfil não existe, cria um novo
+                PerfilUsuario.objects.create(user=user, **perfil_data)
+
+        return user
+
+class ProvaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Prova
+        fields = ['id','titulo', 'data', 'foto', 'descricao', 'criado_em']
+        read_only_fields = ['criado_em']
+
+    def create(self, validated_data):
+        validated_data['usuario'] = self.context['request'].user
+        return super().create(validated_data)
 
