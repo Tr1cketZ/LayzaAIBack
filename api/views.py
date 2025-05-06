@@ -12,15 +12,9 @@ from django.conf import settings
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser
 
-@swagger_auto_schema(
-    methods=['GET'],
-    tags=["Perfil"],
-)
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def me(request):
-    return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
 # Create your views here.
+
+# region Auth
 @swagger_auto_schema(
     methods=['POST'],
     request_body= UserCreateSerializer,
@@ -143,6 +137,17 @@ def password_reset_confirm(request):
             )
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# endregion
+
+# region Perfil
+@swagger_auto_schema(
+    methods=['GET'],
+    tags=["Perfil"],
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me(request):
+    return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
 
 @swagger_auto_schema(
     methods=['PUT', 'PATCH'],
@@ -215,7 +220,9 @@ def perfil_delete(request):
             {"detail": "Erro ao desativar conta"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+# endregion
 
+# region Conteúdos
 @swagger_auto_schema(
     methods=['GET'],
     operation_description="Lista todos os conteúdos disponíveis",
@@ -300,7 +307,9 @@ def conteudo_delete(request, pk):
     conteudo.is_active = False
     conteudo.save()
     return Response(status=status.HTTP_204_NO_CONTENT)
+# endregion
 
+# region Provas
 @swagger_auto_schema(
     methods=['GET'],
     operation_description="Lista todas as provas do usuário autenticado",
@@ -410,3 +419,107 @@ def prova_delete(request, pk):
 
     prova.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+# endregion
+
+# region Avaliações
+@swagger_auto_schema(
+    methods=['GET'],
+    operation_description="Lista avaliações do usuário autenticado, com filtros por tema",
+    tags=["Avaliações"],
+    responses={200: AvaliacaoSerializer(many=True)},
+    manual_parameters=[
+        openapi.Parameter('tema', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filtrar por tema (e.g., Matemática)"),
+    ]
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def avaliacao_list(request):
+    queryset = Avaliacao.objects.filter(user=request.user).select_related('conteudo')
+    tema = request.query_params.get('tema')
+    if tema:
+        queryset = queryset.filter(conteudo__tema=tema)
+    queryset = queryset.order_by('-data_avaliacao')
+    serializer = AvaliacaoSerializer(queryset, many=True)
+    return Response(serializer.data)
+
+@swagger_auto_schema(
+    methods=['GET'],
+    operation_description="Retorna detalhes de uma avaliação",
+    tags=["Avaliações"],
+    responses={200: AvaliacaoSerializer}
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def avaliacao_detail(request, pk):
+    try:
+        if request.user.is_staff:
+            avaliacao = Avaliacao.objects.get(pk=pk)
+        else:
+            avaliacao = Avaliacao.objects.get(pk=pk, user=request.user)
+        serializer = AvaliacaoSerializer(avaliacao)
+        return Response(serializer.data)
+    except Avaliacao.DoesNotExist:
+        return Response({"detail": "Avaliação não encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+@swagger_auto_schema(
+    methods=['POST'],
+    operation_description="Cria uma nova avaliação para um conteúdo",
+    request_body=AvaliacaoSerializer,
+    tags=["Avaliações"],
+    responses={201: AvaliacaoSerializer}
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def avaliacao_create(request):
+    serializer = AvaliacaoSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(
+    methods=['PUT', 'PATCH'],
+    operation_description="Atualiza uma avaliação",
+    request_body=AvaliacaoSerializer,
+    tags=["Avaliações"],
+    responses={200: AvaliacaoSerializer}
+)
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def avaliacao_update(request, pk):
+    try:
+        if request.user.is_staff:
+            avaliacao = Avaliacao.objects.get(pk=pk)
+        else:
+            avaliacao = Avaliacao.objects.get(pk=pk, user=request.user)
+        serializer = AvaliacaoSerializer(
+            avaliacao,
+            data=request.data,
+            partial=request.method == 'PATCH'
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Avaliacao.DoesNotExist:
+        return Response({"detail": "Avaliação não encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+@swagger_auto_schema(
+    methods=['DELETE'],
+    operation_description="Deleta uma avaliação",
+    tags=["Avaliações"],
+    responses={204: "No Content"}
+)
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def avaliacao_delete(request, pk):
+    try:
+        if request.user.is_staff:
+            avaliacao = Avaliacao.objects.get(pk=pk)
+        else:
+            avaliacao = Avaliacao.objects.get(pk=pk, user=request.user)
+        avaliacao.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Avaliacao.DoesNotExist:
+        return Response({"detail": "Avaliação não encontrada"}, status=status.HTTP_404_NOT_FOUND)    
+# endregion

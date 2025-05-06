@@ -53,7 +53,7 @@ class Prova(models.Model):
 class Avaliacao(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     conteudo = models.ForeignKey(Conteudo, on_delete=models.CASCADE)
-    nota = models.CharField(max_length=10)
+    nota = models.CharField(max_length=10,blank=True)
     comentario = models.TextField(null=True, blank=True)
     data_avaliacao = models.DateTimeField(auto_now_add=True)
 
