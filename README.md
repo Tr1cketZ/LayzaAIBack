@@ -110,20 +110,14 @@ A documentação da API está disponível em `/swagger/` quando o servidor estiv
 - `PUT /api/conteudos/<id>/update/` - Atualizar conteúdo (admin)
 - `DELETE /api/conteudos/<id>/delete/` - Deletar conteúdo (admin)
 
-#### Avaliações ❌ Não Implementado
+#### Avaliações ✅ Implementado
 - `GET /api/avaliacoes/` - Listar avaliações
 - `POST /api/avaliacoes/` - Criar avaliação
 - `GET /api/avaliacoes/<id>/` - Detalhes da avaliação
 - `PUT /api/avaliacoes/<id>/` - Atualizar avaliação
 - `DELETE /api/avaliacoes/<id>/` - Deletar avaliação
 
-#### Progresso ❌ Não Implementado
-- `GET /api/progresso/` - Listar progresso
-- `POST /api/progresso/` - Registrar progresso
-- `GET /api/progresso/<id>/` - Detalhes do progresso
-- `PUT /api/progresso/<id>/` - Atualizar progresso
-
-#### Provas ❌ Não Implementado
+#### Provas ✅ Implementado
 - `GET /api/provas/` - Listar provas
 - `POST /api/provas/` - Criar prova
 - `GET /api/provas/<id>/` - Detalhes da prova
