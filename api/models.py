@@ -60,20 +60,9 @@ class Avaliacao(models.Model):
     def __str__(self):
         return f"Avaliação de {self.user.username} para {self.conteudo.titulo}"
 
-class Progresso(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    conteudo = models.ForeignKey(Conteudo, on_delete=models.CASCADE)
-    concluido = models.BooleanField(default=False)
-    data_conclusao = models.DateTimeField(null=True, blank=True)
-    desempenho = models.IntegerField(null=True, blank=True)
-
-    def __str__(self):
-        return f"Progresso de {self.user.username} em {self.conteudo.titulo}"
-
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-import uuid
 
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

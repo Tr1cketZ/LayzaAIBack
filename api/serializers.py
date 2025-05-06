@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Conteudo, Progresso, Avaliacao, PerfilUsuario, Prova
+from .models import Conteudo, Avaliacao, PerfilUsuario, Prova
 from rest_framework_simplejwt.tokens import RefreshToken
 import re
 from django.contrib.auth import authenticate
@@ -126,22 +126,6 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
         model = Avaliacao
         fields = ['id', 'user', 'conteudo', 'conteudo_id', 'nota', 'comentario', 'data_avaliacao']
         read_only_fields = ['user', 'data_avaliacao']
-
-    def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
-        return super().create(validated_data)
-
-class ProgressoSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    conteudo = ConteudoSerializer(read_only=True)
-    conteudo_id = serializers.PrimaryKeyRelatedField(
-        queryset=Conteudo.objects.all(), source='conteudo', write_only=True
-    )
-
-    class Meta:
-        model = Progresso
-        fields = ['id', 'user', 'conteudo', 'conteudo_id', 'concluido', 'data_conclusao', 'desempenho']
-        read_only_fields = ['user']
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
