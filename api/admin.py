@@ -1,13 +1,11 @@
 from django.contrib import admin
-from .models import Conteudo, Progresso, Avaliacao, PerfilUsuario
+from .models import Conteudo, Avaliacao, PerfilUsuario
 # Register your models here.
 @admin.register(Conteudo)
 class ConteudoAdmin(admin.ModelAdmin):
-    list_display = ('titulo', 'tipo', 'tema', 'url', 'duracao_estimada', 'data_criacao')
-
-@admin.register(Progresso)
-class ProgressoAdmin(admin.ModelAdmin):
-    list_display = ('user', 'conteudo', 'concluido', 'data_conclusao', 'desempenho')
+    list_display = ('titulo', 'tipo', 'tema', 'duracao_estimada', 'data_criacao', 'is_active')
+    list_filter = ('tipo', 'tema', 'is_active')
+    list_editable = ('is_active',)
 
 @admin.register(Avaliacao)
 class AvaliacaoAdmin(admin.ModelAdmin):

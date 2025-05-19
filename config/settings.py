@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ne@8omsc+71!mjr*xfs(+t5fskz9c!qit#9doeb3dp66u7+4lr'
+SECRET_KEY = "django-insecure-ne@8omsc+71!mjr*xfs(+t5fskz9c!qit#9doeb3dp66u7+4lr"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -31,89 +31,85 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'api',
-    'drf_yasg',
-    'rest_framework_simplejwt',
-    'corsheaders',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "api",
+    "drf_yasg",
+    "rest_framework_simplejwt",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-REST_FRAMEWORK = { 
-	'DEFAULT_AUTHENTICATION_CLASSES': [
-	 'rest_framework_simplejwt.authentication.JWTAuthentication', ],
-'DEFAULT_PERMISSION_CLASSES': [
-'rest_framework.permissions.IsAuthenticated', ],
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 }
-from datetime import timedelta 
-SIMPLE_JWT = { 
-	'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-'ROTATE_REFRESH_TOKENS': False,
-	'BLACKLIST_AFTER_ROTATION': True, 
-} 
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
 
 SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization',
-            'in': 'header'
-        }
-        
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
     },
-    'SECURITY_REQUIREMENTS': [
-        {
-            'Bearer': []
-        }
-    ],
-    'USE_SESSION_AUTH': False,
+    "SECURITY_REQUIREMENTS": [{"Bearer": []}],
+    "USE_SESSION_AUTH": False,
 }
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -123,16 +119,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -140,8 +136,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Sao_Paulo'  # Ajuste conforme necessário
+LANGUAGE_CODE = "pt-br"
+TIME_ZONE = "America/Sao_Paulo"  # Ajuste conforme necessário
 USE_I18N = True
 USE_TZ = True
 
@@ -149,22 +145,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Para envio real
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para testes no console(comentar em produção)
-EMAIL_HOST = 'smtp.gmail.com'  # Exemplo com Gmail; ajuste para seu provedor
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"  # Para envio real
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"  # Para testes no console(comentar em produção)
+EMAIL_HOST = "smtp.gmail.com"  # Exemplo com Gmail; ajuste para seu provedor
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'suporteLayza@gmail.com'  # Seu email
-EMAIL_HOST_PASSWORD = '123'  # Senha de app (não a senha normal, se usar Gmail)
-DEFAULT_FROM_EMAIL = 'Layza Suporte <suporteLayza@gmail.com>'
+EMAIL_HOST_USER = "suporteLayza@gmail.com"  # Seu email
+EMAIL_HOST_PASSWORD = "123"  # Senha de app (não a senha normal, se usar Gmail)
+DEFAULT_FROM_EMAIL = "Layza Suporte <suporteLayza@gmail.com>"
 
 # Configurações do CORS
-CORS_ALLOW_ALL_ORIGINS = True  # Em produção, defina como False e especifique os domínios permitidos
+CORS_ALLOW_ALL_ORIGINS = (
+    True  # Em produção, defina como False e especifique os domínios permitidos
+)
 # CORS_ALLOWED_ORIGINS = [] # habilitar para produção quando CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
