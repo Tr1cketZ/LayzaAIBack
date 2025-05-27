@@ -184,6 +184,27 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             raise serializers.ValidationError("A senha deve conter pelo menos um número.")
         return value
 
+class CodeVerificationSerializer(serializers.Serializer):
+    code = serializers.CharField(
+        write_only=True,
+        min_length=6,
+        max_length=6,
+        error_messages={
+            'blank': 'O código não pode estar em branco.',
+            'required': 'O código é obrigatório.',
+            'min_length': 'O código deve ter pelo menos 6 caracteres.',
+            'max_length': 'O código deve ter no máximo 6 caracteres.'
+        }
+    )
+    email = serializers.EmailField(
+        required=True,
+        error_messages={
+            'blank': 'O email não pode estar em branco.',
+            'required': 'O email é obrigatório.',
+            'invalid': 'Insira um email válido, como exemplo@dominio.com'
+        }
+    )
+
 class UserUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=False,

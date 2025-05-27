@@ -8,6 +8,7 @@ urlpatterns = [
     path('login/', views.login),
     path('password-reset/', views.password_reset_request,name="password_reset_request"),
     path('password-reset/confirm/', views.password_reset_confirm, name='password_reset_confirm'),
+    path('password-reset/verify-code/', views.password_reset_verify_code, name='password_reset_verify_code'),
 
     # Endpoints de Perfil
     path('perfil/', views.me, name='perfil-completo'),

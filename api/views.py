@@ -137,6 +137,32 @@ def password_reset_confirm(request):
             )
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(
+    methods=['POST'],
+    request_body=CodeVerificationSerializer,
+    tags=["Auth"],
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_verify_code(request):
+    serializer = CodeVerificationSerializer(data=request.data)
+    if serializer.is_valid():
+        code = serializer.validated_data['code']
+        email = serializer.validated_data['email']
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response(
+                {"email": "Email não encontrado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        if not PasswordResetToken.objects.filter(user=user, code=code).exists():
+            return Response(
+                {"code": "Código de verificação inválido."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response({"message": "Código verificado com sucesso."}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # endregion
 
 # region Perfil
