@@ -35,7 +35,4 @@ urlpatterns = [
     path('avaliacoes/<int:pk>/', views.avaliacao_detail, name='avaliacao-detail'),
     path('avaliacoes/<int:pk>/update/', views.avaliacao_update, name='avaliacao-update'),
     path('avaliacoes/<int:pk>/delete/', views.avaliacao_delete, name='avaliacao-delete'),
-
-    # Faltam endpoints para:
-    # - CRUD completo de avaliações
 ]
