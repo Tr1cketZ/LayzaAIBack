@@ -4,10 +4,17 @@ from django.contrib.auth.models import User
 import os
 
 class PerfilUsuario(models.Model):
+    SERIE_CHOICES = [
+        ('1º Ano', '1º Ano'),
+        ('2º Ano', '2º Ano'),
+        ('3º Ano', '3º Ano'),
+    ]
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     pref_visual = models.BooleanField(default=False)
     pref_auditivo = models.BooleanField(default=False)
     pref_leitura_escrita = models.BooleanField(default=False)
+    serie_atual = models.CharField(max_length=10, choices=SERIE_CHOICES, blank=True, null=True)
+    fotoPerfil = models.ImageField(upload_to='images/fotos_perfil/', null=True, blank=True)
 
     def __str__(self):
         return f"Perfil de {self.user.username}"
@@ -40,7 +47,7 @@ class Prova(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     titulo = models.CharField(max_length=100)
     data = models.DateField()
-    foto = models.ImageField(upload_to='provas/', null=True, blank=True)
+    foto = models.ImageField(upload_to='images/provas/', null=True, blank=True)
     descricao = models.TextField(blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     def __str__(self):

@@ -8,10 +8,12 @@ class UserSerializer(serializers.ModelSerializer):
     pref_visual = serializers.BooleanField(source='perfilusuario.pref_visual', read_only=True)
     pref_auditivo = serializers.BooleanField(source='perfilusuario.pref_auditivo', read_only=True)
     pref_leitura_escrita = serializers.BooleanField(source='perfilusuario.pref_leitura_escrita', read_only=True)
+    serie_atual = serializers.CharField(source='perfilusuario.serie_atual', read_only=True)
+    foto_perfil = serializers.ImageField(source='perfilusuario.fotoPerfil')
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_staff', 'pref_visual', 'pref_auditivo', 'pref_leitura_escrita']
+        fields = ['id', 'username', 'email', 'is_staff', 'pref_visual', 'pref_auditivo', 'pref_leitura_escrita', 'serie_atual', 'foto_perfil']
         read_only_fields = ['is_staff']  # Apenas admin pode alterar
 
 class LoginSerializer(serializers.Serializer):
@@ -216,10 +218,23 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     pref_visual = serializers.BooleanField(required=False)
     pref_auditivo = serializers.BooleanField(required=False)
     pref_leitura_escrita = serializers.BooleanField(required=False)
+    foto_perfil = serializers.ImageField(
+        source='perfilusuario.fotoPerfil',
+        required=False,
+        allow_null=True,
+        error_messages={
+            'invalid': 'Formato de imagem inválido. Use JPG, PNG ou GIF.',
+        }
+    )
+    serie_atual = serializers.CharField(
+        source='perfilusuario.serie_atual',
+        required=False,
+        allow_blank=True,
+    )
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'pref_visual', 'pref_auditivo', 'pref_leitura_escrita']
+        fields = ['email', 'username', 'pref_visual', 'pref_auditivo', 'pref_leitura_escrita', 'foto_perfil', 'serie_atual']
         extra_kwargs = {
             'email': {'required': False},
             'username': {'required': False}
@@ -238,20 +253,16 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        # Remove os campos do perfil dos dados do usuário
-        perfil_data = {
-            'pref_visual': validated_data.pop('pref_visual', None),
-            'pref_auditivo': validated_data.pop('pref_auditivo', None),
-            'pref_leitura_escrita': validated_data.pop('pref_leitura_escrita', None)
-        }
+    # Extrai dados do perfil se existirem
+        perfil_data = validated_data.pop('perfilusuario', {})
 
         # Atualiza o usuário
         user = super().update(instance, validated_data)
 
         # Atualiza o perfil se houver dados
-        if any(perfil_data.values()):
+        if perfil_data:
             try:
-                perfil = PerfilUsuario.objects.get(user=user)
+                perfil = user.perfilusuario
                 for key, value in perfil_data.items():
                     if value is not None:
                         setattr(perfil, key, value)

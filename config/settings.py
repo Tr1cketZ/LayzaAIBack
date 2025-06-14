@@ -166,3 +166,9 @@ CORS_ALLOW_ALL_ORIGINS = (
 )
 # CORS_ALLOWED_ORIGINS = [] # habilitar para produção quando CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
+
+
+import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
