@@ -253,7 +253,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-    # Extrai dados do perfil se existirem
+        # Extrai dados do perfil se existirem
         perfil_data = validated_data.pop('perfilusuario', {})
 
         # Atualiza o usuário
@@ -263,6 +263,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         if perfil_data:
             try:
                 perfil = user.perfilusuario
+                # Se for enviada uma nova foto, exclui a antiga
+                if 'fotoPerfil' in perfil_data and perfil.fotoPerfil:
+                    nova_foto = perfil_data.get('fotoPerfil')
+                    if nova_foto and hasattr(perfil.fotoPerfil, 'path') and perfil.fotoPerfil.path != nova_foto:
+                        perfil.fotoPerfil.delete(save=False)
                 for key, value in perfil_data.items():
                     if value is not None:
                         setattr(perfil, key, value)
